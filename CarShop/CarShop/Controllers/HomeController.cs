@@ -21,7 +21,23 @@ namespace CarShop.Controllers
         {
             return View(context.Cars.ToList());
         }
-
-       
+        [HttpGet]
+        public IActionResult Buy(int? id)
+        {
+            if (id == null)
+            {
+                return RedirectToAction("Index");
+            }
+            ViewBag.CarId = id;
+            return View();
+        }
+        [HttpPost]
+        public IActionResult Buy(Order order)
+        {
+            context.Orders.Add(order);
+            context.SaveChanges();
+            return RedirectToAction("Index");
+        }
     }
+
 }
