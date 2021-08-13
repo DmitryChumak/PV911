@@ -1,0 +1,37 @@
+﻿@model IEnumerable<CarShop.Models.Car>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<a href="~/Admin/Create" class="btn btn-primary">New item</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Model</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var car in Model)
+        {
+        <tr>
+            <td>@car.Title</td>
+            <td>@car.Model</td>
+            <td>@car.Price</td>
+            <td>
+                <a href="~/Admin/Create/@car.CarId" class="btn btn-warning">Edit</a>
+            </td>
+            <td>
+                <form action="~/Admin/Delete" method="post">
+                    <input type="hidden" value="@car.CarId" name="CarId"/>
+                    <input type="submit" value="Delete" class="btn btn-danger" />
+                </form>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
