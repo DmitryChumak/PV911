@@ -1,4 +1,5 @@
-﻿@*
+﻿@model CarShop.Models.Order
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -8,18 +9,22 @@
     <div>
         <h1>Order</h1>
         <form method="post">
+        @*    @Html.ValidationSummary()*@
             <input type="hidden" value="@ViewBag.CarId" name="CarId" />
             <div>
-                <label>Name: </label>
-                <input type="text" name="Name" />
+                @Html.LabelFor(x => x.Name)
+                @Html.TextBoxFor(x => x.Name)
+                @Html.ValidationMessage("Name", null, new { @class = (Model != null) && (Model.Name == null) ? "alert alert-danger" : "" })
             </div>
             <div>
-                <label>Lastname: </label>
-                <input type="text" name="Lastname" />
+                @Html.LabelFor(x => x.Lastname)
+                @Html.TextBoxFor(x => x.Lastname)
+                @Html.ValidationMessage("Lastname")
             </div>
             <div>
-                <label>Phone: </label>
-                <input type="text" name="ContactPhone" />
+                @Html.LabelFor(x => x.ContactPhone)
+                @Html.TextBoxFor(x => x.ContactPhone)
+                @Html.ValidationMessage("ContactPhone")
             </div>
             <input type="submit" />
         </form>
