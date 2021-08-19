@@ -28,6 +28,7 @@ namespace CarShop
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<CarContext>(options => options.UseSqlServer(connection));
             services.AddControllersWithViews();
+            services.AddSession();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +47,7 @@ namespace CarShop
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseSession();
             app.UseRouting();
 
             app.UseAuthorization();
