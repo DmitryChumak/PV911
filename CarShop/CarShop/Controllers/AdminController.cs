@@ -1,4 +1,5 @@
 ﻿using CarShop.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace CarShop.Controllers
 {
+    //[AllowAnonymous]
+    [Authorize]
     public class AdminController : Controller
     {
         CarContext context;
@@ -18,7 +21,6 @@ namespace CarShop.Controllers
         {
             return View(context.Cars.ToList()) ;
         }
-
         public IActionResult Create(int? id)
         {
             if (id == null)
