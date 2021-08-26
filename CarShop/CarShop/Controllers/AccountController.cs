@@ -2,6 +2,7 @@
 using CarShop.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,15 +15,18 @@ namespace CarShop.Controllers
 {
     public class AccountController : Controller
     {
-        CarContext context;
-        public AccountController(CarContext context)
+        private readonly UserManager<User> userManager;
+        private readonly SignInManager<User> signInManager;
+
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
         {
-            this.context = context;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
         }
 
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = null)
         {
-            return View();
+            return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
         [HttpPost]
@@ -31,14 +35,18 @@ namespace CarShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = await context
-                                    .Users
-                                    .Include(x => x.Role)
-                                    .FirstOrDefaultAsync(x => x.Email == model.Email && x.Password == model.Password);
-                if (user != null)
+                var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+                if (result.Succeeded)
                 {
-                    await Authenticate(user);
-                    return RedirectToAction("Index", "Home");
+                    if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                    {
+                        return Redirect(model.ReturnUrl);
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+
                 }
                 else
                 {
@@ -58,41 +66,29 @@ namespace CarShop.Controllers
         {
             if (ModelState.IsValid)
             {
-                User user = await context.Users.FirstOrDefaultAsync(x => x.Email == model.Email && x.Password == model.Password);
-                if (user == null)
+                User user = new User { Email = model.Email, Year = model.Year, UserName = model.Email };
+                IdentityResult result = await userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
                 {
-                    user = new User { Email = model.Email, Password = model.Password };
-                    Role userRole = await context.Roles.FirstOrDefaultAsync(x => x.Name == "user");
-                    if (userRole != null)
-                    {
-                        user.Role = userRole;
-                    }
-                    context.Users.Add(user);
-                    await context.SaveChangesAsync();
-                    await Authenticate(user);
+                    await signInManager.SignInAsync(user, false);
                     return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
                 }
             }
             return View(model);
         }
 
-        private async Task Authenticate(User user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email),
-                new Claim(ClaimsIdentity.DefaultRoleClaimType, user.Role?.Name)
-            };
-
-            ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
-
-        }
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
     }

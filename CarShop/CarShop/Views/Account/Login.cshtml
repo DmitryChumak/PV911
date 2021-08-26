@@ -8,7 +8,7 @@
 <h1>Login</h1>
 <a asp-controller="Account" asp-action="Register" class="btn btn-primary mb-4">Register</a>
 
-<form asp-action="Login" asp-controller="Account" asp-antiforgery="true">
+<form asp-action="Login" asp-controller="Account" asp-antiforgery="true" asp-route-returnUrl="@Model.ReturnUrl">
     <div asp-validation-summary="ModelOnly"></div>
     <div>
         <div>
@@ -20,6 +20,10 @@
             @Html.LabelFor(x => x.Password)
             @Html.PasswordFor(x => x.Password)
             @Html.ValidationMessageFor(x => x.Password)
+        </div>
+        <div>
+            @Html.LabelFor(x => x.RememberMe)
+            @Html.CheckBoxFor(x => x.RememberMe)
         </div>
         <input type="submit" value="Login" class="btn btn-warning" />
     </div>
