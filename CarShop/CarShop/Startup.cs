@@ -49,6 +49,8 @@ namespace CarShop
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseStatusCodePages("text/html", "<center><h1>Sorry, but you have error: <b>404</b></h1></center>");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
