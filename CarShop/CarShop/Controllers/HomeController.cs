@@ -1,5 +1,7 @@
 ﻿using CarShop.Models;
+using CarShop.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,9 +19,32 @@ namespace CarShop.Controllers
             this.context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(SortType sortType = SortType.TitleAsc, string company = "(all)")
         {
-            return View(context.Cars.ToList());
+            List<Car> cars = null;
+            List<string> companies = new List<string> { "(all)" };
+            companies.AddRange(context.Cars.Select(x => x.Title).Distinct());
+            switch (sortType)
+            {
+                case SortType.TitleAsc:
+                    cars = context.Cars.OrderBy(x => x.Title).ToList();
+                    break;
+                case SortType.ModelAsc:
+                    cars = context.Cars.OrderBy(x => x.Model).ToList();
+                    break;
+                case SortType.PriceAsc:
+                    cars = context.Cars.OrderBy(x => x.Price).ToList();
+                    break;
+            }
+
+            if (!company.Contains("all"))
+                cars = cars.Where(x => x.Title.ToLower() == company.ToLower()).ToList();
+
+            return View(new CarListViewModel
+            {
+                Cars = cars,
+                Companies = new SelectList(companies)
+            });
         }
         [HttpGet]
         public IActionResult Buy(int? id)
@@ -34,10 +59,6 @@ namespace CarShop.Controllers
         [HttpPost]
         public IActionResult Buy(Order order)
         {
-            //if (order.Name == "111")
-            //{
-            //    ModelState.AddModelError("Name", "Не вводи 111!!!");
-            //}
             if (ModelState.IsValid)
             {
                 context.Orders.Add(order);
