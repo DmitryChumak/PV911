@@ -1,4 +1,16 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿
 
-// Write your JavaScript code.
+$('#car-list')
+    .load(`/Home/CarsList`)
+
+$('#searchBtn').on('click', function () {
+    const searchText = $('#searchText').val()
+
+    $('#car-list')
+        .load(`/Home/CarsList/?search=${searchText}`)
+
+
+    fetch('/Home/CarsJson')
+        .then(response => response.json())
+        .then(cars => console.log(cars))
+})
