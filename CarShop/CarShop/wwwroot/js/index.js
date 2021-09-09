@@ -43,8 +43,41 @@ async function createCar(title, model, price) {
     if (response.ok === true) {
         const car = await response.json()
         document.querySelector('tbody').append(createTableRow(car))
+    } else {
+        document.getElementById('errors').innerHTML = ''
+
+        const errorData = await response.json()
+        console.log(errorData)
+        console.log(errorData.errors)
+
+        if (errorData) {
+            if (errorData.errors) {
+                for (let error in errorData.errors) {
+                    showError(errorData.errors[error])
+                }
+            }
+
+            if (errorData['TitleModelError']) {
+                showError(errorData['TitleModelError'])
+            }
+
+            if (errorData['PriceModelError']) {
+                showError(errorData['PriceModelError'])
+            }
+
+            document.getElementById('errors').style.display = 'block'
+        }
+
     }
 }
+
+function showError(errors) {
+    errors.forEach(error => {
+        const p = document.createElement('p')
+        p.append(error)
+        document.getElementById('errors').append(p)
+    })
+} 
 
 document.forms['carForm'].addEventListener('submit', function (e) {
     e.preventDefault()

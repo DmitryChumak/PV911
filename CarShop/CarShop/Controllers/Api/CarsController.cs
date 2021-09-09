@@ -40,6 +40,18 @@ namespace CarShop.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<Car>> Post(Car car)
         {
+            if (car.Price > 100000)
+            {
+                ModelState.AddModelError("PriceModelError", "Price should be less than 100K");
+            }
+            if (car.Title.ToLower() == "lada")
+            {
+                ModelState.AddModelError("TitleModelError", "You cannot add Lada to our shop");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             context.Cars.Add(car);
             await context.SaveChangesAsync();
             return Ok(car);
