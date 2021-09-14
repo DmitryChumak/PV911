@@ -1,4 +1,8 @@
-﻿function createTableRow(car) {
+﻿var tokenKey = "access_token"
+
+
+
+function createTableRow(car) {
     const tr = document.createElement('tr')
 
     const titleTd = document.createElement('td')
@@ -18,7 +22,13 @@
 }
 
 async function getCars() {
-    const response = await fetch('/api/cars')
+    const token = sessionStorage.getItem(tokenKey)
+    const response = await fetch('/api/cars', {
+        method: 'GET',
+        headers: {
+            'Authorization': 'bearer ' + token
+        }
+    })
     if (response.ok === true) {
         const cars = await response.json()
         let rows = document.querySelector('tbody')
@@ -91,3 +101,32 @@ document.forms['carForm'].addEventListener('submit', function (e) {
 
 
 getCars()
+
+
+async function getTokenAsync() {
+    const credentials = {
+        login: document.getElementById('login').value,
+        password: document.getElementById('password').value
+    }
+
+    const response = await fetch('api/account/token', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(credentials)
+    })
+
+    const data = await response.json()
+    if (response.ok === true) {
+        sessionStorage.setItem(tokenKey, data.access_token)
+        getCars()
+    } else {
+        console.log(response.status, response.errorText)
+    }
+}
+
+
+document.getElementById('loginForm').addEventListener('click', function () {
+    getTokenAsync()
+})
